@@ -48,6 +48,8 @@ DNS_FOR_REALM_CONFIGURE_ENABLE=	dns-for-realm
 LDAP=			Enable LDAP support
 LDAP_USE=		OPENLDAP=yes
 LDAP_CONFIGURE_WITH=	ldap
+LIBEDIT_USES=		libedit
+LIBEDIT_CONFIGURE_WITH=	libedit
 
 .if defined(KRB5_HOME)
 PREFIX=			${KRB5_HOME}
@@ -82,13 +84,6 @@ USES+=			readline
 CONFIGURE_ARGS+=	--with-readline
 .else
 CONFIGURE_ARGS+=	--without-readline
-.endif
-
-.if ${PORT_OPTIONS:MLIBEDIT}
-USES+=			libedit
-CONFIGURE_ARGS+=	--with-libedit
-.else
-CONFIGURE_ARGS+=	--without-libedit
 .endif
 
 .if defined(PROGRAM_TRANSFORM_NAME) && ${PROGRAM_TRANSFORM_NAME} != ""
