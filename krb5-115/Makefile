@@ -64,6 +64,7 @@ LDFLAGS+=		-L${LOCALBASE}/lib -L${OPENSSLLIB}
 USE_RC_SUBR=		kpropd
 OPTIONS_SUB=		yes
 WRKSRC_SUBDIR=		src
+DOCSRC=			${WRKSRC}/../doc
 PORTEXAMPLES=		kdc.conf krb5.conf services.append
 
 .include <bsd.port.options.mk>
@@ -96,18 +97,14 @@ CONFIGURE_ARGS+=	--without-readline
 CONFIGURE_ARGS+=	--program-transform-name="${PROGRAM_TRANSFORM_NAME}"
 .endif
 
-HTML_DOC_DIR=		${WRKDIR}/${PORTNAME}-${PORTVERSION}/doc/html
-PDF_DOC_DIR=		${WRKDIR}/${PORTNAME}-${PORTVERSION}/doc/pdf
-
-
 .include <bsd.port.pre.mk>
 
 post-install:
 	@${MKDIR} ${STAGEDIR}${PREFIX}/share/doc/krb5
 # html documentation
 .if ${PORT_OPTIONS:MKRB5_PDF}
-	pdf_files=`${FIND} ${PDF_DOC_DIR} ! -type d`
-	pdf_dirs=`${FIND} ${PDF_DOC_DIR} -type d`
+	pdf_files=`${FIND} ${DOCSRC}/pdf ! -type d`
+	pdf_dirs=`${FIND} ${DOCSRC}/pdf -type d`
 	for i in $${pdf_dirs}; do \
 		${MKDIR} ${STAGEDIR}${PREFIX}/share/doc/krb5/$${i}; \
 	done; \
@@ -117,8 +114,8 @@ post-install:
 	done
 .endif
 .if ${PORT_OPTIONS:MKRB5_HTML}
-	html_files=`${FIND} ${HTML_DOC_DIR} ! -type d | ${GREP} -v /_sources`
-	html_dirs=`${FIND} ${HTML_DOC_DIR} -type d | ${GREP} -v /_sources`
+	html_files=`${FIND} ${DOCSRC}/html ! -type d | ${GREP} -v /_sources`
+	html_dirs=`${FIND} ${DOCSRC}/html -type d | ${GREP} -v /_sources`
 	for i in $${html_dirs}; do \
 		${MKDIR} ${PREFIX}/share/doc/krb5/$${i}; \
 	done; \
