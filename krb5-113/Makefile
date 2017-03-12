@@ -47,6 +47,8 @@ KRB5_PDF_DESC=		Install krb5 PDF documentation
 KRB5_HTML_DESC=		Install krb5 HTML documentation
 DNS_FOR_REALM_DESC=	Enable DNS lookups for Kerberos realm names
 LDAP=			Enable LDAP support
+LDAP_USE=		OPENLDAP=yes
+LDAP_CONFIGURE_WITH=	ldap
 
 .if defined(KRB5_HOME)
 PREFIX=			${KRB5_HOME}
@@ -78,11 +80,6 @@ BROKEN=			LIB_DEPENDS when using KRB5_HOME is broken
 
 .if ${PORT_OPTIONS:MDNS_FOR_REALM}
 CONFIGURE_ARGS+=	--enable-dns-for-realm
-.endif
-
-.if ${PORT_OPTIONS:MLDAP}
-USE_OPENLDAP=		yes
-CONFIGURE_ARGS+=	--with-ldap
 .endif
 
 .if ${PORT_OPTIONS:MREADLINE}
