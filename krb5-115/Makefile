@@ -3,7 +3,7 @@
 
 PORTNAME=		krb5
 PORTVERSION=		1.15.1
-PORTREVISION=		3
+PORTREVISION=		4
 CATEGORIES=		security
 MASTER_SITES=		http://web.mit.edu/kerberos/dist/${PORTNAME}/${PORTVERSION:C/^[0-9]*\.[0-9]*/&X/:C/X\.[0-9]*$//:C/X//}/
 .if !defined(MASTERDIR)
@@ -36,13 +36,15 @@ CPE_VENDOR=		mit
 CPE_VERSION=		5-${PORTVERSION}
 CPE_PRODUCT=		kerberos
 
-OPTIONS_DEFINE=		EXAMPLES NLS KRB5_PDF KRB5_HTML DNS_FOR_REALM LDAP
-OPTIONS_DEFAULT=	KRB5_PDF KRB5_HTML READLINE
+OPTIONS_DEFINE=		DOCS EXAMPLES NLS DOCPDF DOCHTML DNS_FOR_REALM LDAP
+OPTIONS_DEFAULT=	DOCPDF DOCHTML READLINE
 OPTIONS_RADIO=		CMD_LINE_EDITING
 OPTIONS_RADIO_CMD_LINE_EDITING=	READLINE READLINE_PORT LIBEDIT
 CMD_LINE_EDITING_DESC=	Command line editing for kadmin and ktutil
-KRB5_PDF_DESC=		Install krb5 PDF documentation
-KRB5_HTML_DESC=		Install krb5 HTML documentation
+DOCPDF_DESC=		Install krb5 PDF documentation
+DOCPDF_PORTDOCS=	pdf
+DOCHTML_DESC=		Install krb5 HTML documentation
+DOCHTML_PORTDOCS=	html
 DNS_FOR_REALM_DESC=	Enable DNS lookups for Kerberos realm names
 DNS_FOR_REALM_CONFIGURE_ENABLE=	dns-for-realm
 LDAP=			Enable LDAP support
@@ -97,44 +99,21 @@ CONFIGURE_ARGS+=	--without-readline
 CONFIGURE_ARGS+=	--program-transform-name="${PROGRAM_TRANSFORM_NAME}"
 .endif
 
+.if !${PORT_OPTIONS:MDOCS} && ( ${PORT_OPTIONS:MDOCPDF} || ${PORT_OPTIONS:MDOCHTML} )
+check-config:
+	@${ECHO_MSG} "====> WARNING: The DOCS option is disabled, so the DOCPDF and DOCHTML options will have no effect"
+.endif
+
 .include <bsd.port.pre.mk>
 
-post-install:
-	@${MKDIR} ${STAGEDIR}${PREFIX}/share/doc/krb5
-# html documentation
-.if ${PORT_OPTIONS:MKRB5_PDF}
-	pdf_files=`${FIND} ${DOCSRC}/pdf ! -type d`
-	pdf_dirs=`${FIND} ${DOCSRC}/pdf -type d`
-	for i in $${pdf_dirs}; do \
-		${MKDIR} ${STAGEDIR}${PREFIX}/share/doc/krb5/$${i}; \
-	done; \
-	for i in $${pdf_files}; do \
-		${INSTALL_MAN} $${pdf} ${PREFIX}/share/doc/krb5/$${i}; \
-		${ECHO_CMD} share/doc/krb5/$${i} >> ${TMPPLIST}; \
-	done
+post-install-DOCS-on:
+	${MKDIR} ${STAGEDIR}${DOCSDIR}
+.if ${PORT_OPTIONS:MDOCPDF}
+	cd ${DOCSRC} && ${COPYTREE_SHARE} pdf ${STAGEDIR}${DOCSDIR} "-name *.pdf"
 .endif
-.if ${PORT_OPTIONS:MKRB5_HTML}
-	html_files=`${FIND} ${DOCSRC}/html ! -type d | ${GREP} -v /_sources`
-	html_dirs=`${FIND} ${DOCSRC}/html -type d | ${GREP} -v /_sources`
-	for i in $${html_dirs}; do \
-		${MKDIR} ${PREFIX}/share/doc/krb5/$${i}; \
-	done; \
-	for i in $${html_files}; do \
-		${INSTALL_MAN} $${i} ${PREFIX}/share/doc/krb5/$${i}; \
-		${ECHO_CMD} share/doc/krb5/$${i} >> ${TMPPLIST}; \
-	done
+.if ${PORT_OPTIONS:MDOCHTML}
+	cd ${DOCSRC} && ${COPYTREE_SHARE} html ${STAGEDIR}${DOCSDIR}
 .endif
-.if ${PORT_OPTIONS:MKRB5_PDF}
-	for i in $${pdf_dirs}; do \
-		${ECHO_CMD} @dir share/doc/krb5/$${i} >> ${TMPPLIST}; \
-	done | ${TAIL} -r >> ${TMPPLIST}
-.endif
-.if ${PORT_OPTIONS:MKRB5_HTML}
-	for i in $${html_dirs}; do \
-		${ECHO_CMD} @dir share/doc/krb5/$${i} >> ${TMPPLIST}; \
-	done | ${TAIL} -r >> ${TMPPLIST}
-.endif
-	${ECHO_CMD} @dir share/doc/krb5 >> ${TMPPLIST}
 
 post-install-LDAP-on:
 	${MKDIR} ${STAGEDIR}${DATADIR}
