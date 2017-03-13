@@ -36,15 +36,11 @@ CPE_VENDOR=		mit
 CPE_VERSION=		5-${PORTVERSION}
 CPE_PRODUCT=		kerberos
 
-OPTIONS_DEFINE=		DOCS EXAMPLES NLS DOCPDF DOCHTML DNS_FOR_REALM LDAP
-OPTIONS_DEFAULT=	DOCPDF DOCHTML READLINE
+OPTIONS_DEFINE=		DOCS EXAMPLES NLS DNS_FOR_REALM LDAP
+OPTIONS_DEFAULT=	READLINE
 OPTIONS_RADIO=		CMD_LINE_EDITING
 OPTIONS_RADIO_CMD_LINE_EDITING=	READLINE READLINE_PORT LIBEDIT
 CMD_LINE_EDITING_DESC=	Command line editing for kadmin and ktutil
-DOCPDF_DESC=		Install krb5 PDF documentation
-DOCPDF_PORTDOCS=	pdf
-DOCHTML_DESC=		Install krb5 HTML documentation
-DOCHTML_PORTDOCS=	html
 DNS_FOR_REALM_DESC=	Enable DNS lookups for Kerberos realm names
 DNS_FOR_REALM_CONFIGURE_ENABLE=	dns-for-realm
 LDAP=			Enable LDAP support
@@ -67,6 +63,7 @@ USE_RC_SUBR=		kpropd
 OPTIONS_SUB=		yes
 WRKSRC_SUBDIR=		src
 DOCSRC=			${WRKSRC}/../doc
+PORTDOCS=		html pdf
 PORTEXAMPLES=		kdc.conf krb5.conf services.append
 
 .include <bsd.port.options.mk>
@@ -99,21 +96,12 @@ CONFIGURE_ARGS+=	--without-readline
 CONFIGURE_ARGS+=	--program-transform-name="${PROGRAM_TRANSFORM_NAME}"
 .endif
 
-.if !${PORT_OPTIONS:MDOCS} && ( ${PORT_OPTIONS:MDOCPDF} || ${PORT_OPTIONS:MDOCHTML} )
-check-config:
-	@${ECHO_MSG} "====> WARNING: The DOCS option is disabled, so the DOCPDF and DOCHTML options will have no effect"
-.endif
-
 .include <bsd.port.pre.mk>
 
 post-install-DOCS-on:
 	${MKDIR} ${STAGEDIR}${DOCSDIR}
-.if ${PORT_OPTIONS:MDOCPDF}
 	cd ${DOCSRC} && ${COPYTREE_SHARE} pdf ${STAGEDIR}${DOCSDIR} "-name *.pdf"
-.endif
-.if ${PORT_OPTIONS:MDOCHTML}
 	cd ${DOCSRC} && ${COPYTREE_SHARE} html ${STAGEDIR}${DOCSDIR}
-.endif
 
 post-install-LDAP-on:
 	${MKDIR} ${STAGEDIR}${DATADIR}
